@@ -1,10 +1,10 @@
-from nhlstats import list_games, list_plays
-from nhlstats.formatters import csv
+from nhlstats import list_plays, list_shifts
+import pandas as pd
 
-# List all games today and write all plays from each as a csv file named like the game_id
-for game in list_games():  # No args will list all games today
-    game_id = game['game_id']
-    plays = list_plays(game_id)  # get plays, normalized
+gameid = "2019020418"
 
-    with open('{}.csv'.format(game_id), 'w') as f:
-        csv.dump(plays, f)
+plays = pd.DataFrame(list_plays(gameid))
+shifts = pd.DataFrame(list_shifts(gameid))
+
+print(plays.head())
+shifts.head()
