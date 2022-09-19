@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from nhlstats import list_plays, list_shifts
 import pandas as pd
 
