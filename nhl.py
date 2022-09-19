@@ -4,6 +4,8 @@ import jmespath as j
 import pandas as pd
 from time import sleep
 
+# 0 11 27 31
+
 season = "20212022"
 stats = {}
 time_to_sleep_when_captcha = 5
@@ -27,6 +29,7 @@ for team_id in range(32):
 			else:
 				stats[player_id] = [player_name, {}]
 	except:
+		print("oops...")
 		sleep(time_to_sleep_when_captcha)
 		time_to_sleep_when_captcha += 1
 
