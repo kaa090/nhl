@@ -45,4 +45,4 @@ df = pd.DataFrame.from_dict(stats, orient="index", columns=['name', 'name2', 'po
 df1 = df.reset_index()
 df2 = pd.json_normalize(df['stats'].dropna())
 df3 = pd.merge(df1, df2, left_index=True, right_index=True).set_index('index').drop('stats', 1)
-df3.to_csv(f"nhl_stats_{season}.csv")
+df3.to_csv(f"nhlstats{season}.csv")
