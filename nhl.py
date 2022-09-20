@@ -4,12 +4,10 @@ import jmespath as j
 import pandas as pd
 from time import sleep
 
-# 0 11 27 31
-
 season = "20212022"
 stats = {}
 
-teams = requests.get(f"https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster&season={season}").json()
+teams = requests.get(f"https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster").json()
 
 for team in teams['teams']:
 	print(f"\t\t{team['name']}")
