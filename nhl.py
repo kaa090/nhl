@@ -8,7 +8,10 @@ season = "20212022"
 stats = {}
 
 teams = requests.get(f"https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster").json()
-
+teams2 = requests.get(f"https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster").json()
+if teams == teams2:
+    print(1)
+exit()
 for team in teams['teams']:
 	print(f"\t\t{team['name']}")
 
