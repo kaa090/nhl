@@ -8,33 +8,41 @@ from time import sleep
 
 season = "20212022"
 stats = {}
-time_to_sleep_when_captcha = 5
 
-for team_id in range(32):
-	print(f"\t\tteam_id = {team_id}")
+teams = requests.get(f"https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster&season={season}").json()
+
+for team in teams['teams']:
+	print(f"\t\t{team['name']}")
+
+	players = team['roster']['roster']
 	try:
-		team_data = requests.get(f"https://statsapi.web.nhl.com/api/v1/teams/{team_id}?expand=team.roster&season={season}").json()
+		
+		for player in players:
+			
+			player_id = player['person']['id']
+			player_name = player['person']['fullName']
+			player_name2 = player['person']['fullName'].split(' ')
+			player_name2 = f"{player_name2[1]}, {player_name2[0]}"
+			player_link = player['person']['link']
+			player_pos = player['position']['abbreviation']
+			
+			print(player_name2)
 
-		player_info = j.search('teams[*].roster.roster[*].*', team_data)[0]
-
-		for player in player_info:
-			player_id = j.search('id', player[0])
-			player_name = j.search('fullName', player[0])
-			player_link = j.search('link', player[0])
 			player_data = requests.get(f"https://statsapi.web.nhl.com{player_link}/stats?stats=statsSingleSeason&season={season}").json()
-			player_stats = j.search('stats[*].splits[0].stat', player_data)
-			print(player_name)
+			player_stats = player_data['stats'][0]['splits'][0]['stat']
+			player_sum = 0
+			
 			if len(player_stats) > 0:
-				stats[player_id] = [player_name, player_stats[0]]
+				if player_pos != 'G':
+					player_sum = player_stats['goals'] + player_stats['assists'] + player_stats['pim'] + player_stats['powerPlayPoints'] + player_stats['gameWinningGoals'] + player_stats['shots'] + player_stats['hits'] + player_stats['blocked']
+				stats[player_id] = [player_name, player_name2, player_pos, player_sum, player_stats]
 			else:
-				stats[player_id] = [player_name, {}]
-	except:
-		print("oops...")
-		sleep(time_to_sleep_when_captcha)
-		time_to_sleep_when_captcha += 1
+				stats[player_id] = [player_name, player_name2, player_pos, player_sum, {}]
+	except Exception as e:
+		print(str(e))
 
-df = pd.DataFrame.from_dict(stats, orient="index", columns=['name', 'stats'])
+df = pd.DataFrame.from_dict(stats, orient="index", columns=['name', 'name2', 'pos', 'sum', 'stats'])
 df1 = df.reset_index()
 df2 = pd.json_normalize(df['stats'].dropna())
 df3 = pd.merge(df1, df2, left_index=True, right_index=True).set_index('index').drop('stats', 1)
-df3.to_csv(f"nhlstats{season}.csv")
+df3.to_csv(f"nhl_stats_{season}.csv")
