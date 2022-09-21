@@ -57,10 +57,11 @@ def parse_season(url):
 						statsP[pid] = [name, name2, pos, team_name, my_statP]
 		except Exception as e:
 			print(str(e))
+		break
 
 parse_season("https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster")
-parse_season(f"https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster&season={season}")
-
+# parse_season(f"https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster&season={season}")
+# parse_season(f"https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster&season=20202021")
 
 dfP = pd.DataFrame.from_dict(statsP, orient="index", columns=['name', 'name2', 'pos', 'team', 'stats'])
 dfP1 = dfP.reset_index()
@@ -75,7 +76,7 @@ for clmn in keysPn:
 	dfP3['sum'] += dfP3[clmn]
 dfP3 = dfP3.sort_values('sum', ascending = False)
 
-dfP3.to_csv(f"nhl_statsP_{season}.csv")
+# dfP3.to_csv(f"nhl_statsP_{season}.csv")
 #########################################################################################
 
 dfG = pd.DataFrame.from_dict(statsG, orient="index", columns=['name', 'name2', 'pos', 'team', 'stats'])
@@ -92,4 +93,7 @@ for clmn in keysGn:
 	dfG3['sum'] += dfG3[clmn]
 dfG3 = dfG3.sort_values('sum', ascending = False)
 
-dfG3.to_csv(f"nhl_statsG_{season}.csv")
+# dfG3.to_csv(f"nhl_statsG_{season}.csv")
+
+df = pd.concat([dfP3, dfG3])
+df.to_csv(f"nhl_statPG_{season}.csv")
