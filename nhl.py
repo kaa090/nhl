@@ -11,47 +11,56 @@ keysPn = ['g', 'a', '_pim', 'ppp', 'gwg', '_shots', '_hits', 'blocks',]
 keysG = ['wins', 'goalAgainstAverage', 'savePercentage']
 keysGn = ['w', 'gaa', 'sp']
 
-teams = requests.get(f"https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster").json()
+def parse_season(url):
+	teams = requests.get(url).json()
 
-for team in teams['teams']:
-	team_name = team['abbreviation']
-	print(f"\t\t{team_name}")
+	for team in teams['teams']:
+		team_name = team['abbreviation']
+		print(f"\t\t{team_name}")
 
-	players = team['roster']['roster']
+		players = team['roster']['roster']
 
-	try:
-		for player in players:
-			pid = player['person']['id']
-			name = player['person']['fullName']
-			name2 = player['person']['fullName'].split(' ')
-			name2 = f"{name2[1]}, {name2[0]}"
-			link = player['person']['link']
-			pos = player['position']['abbreviation']			
+		try:
+			for player in players:
+				pid = player['person']['id']
 
-			my_statP = dict.fromkeys(keysP, 0)
-			my_statG = dict.fromkeys(keysG, 0)
+				if pid in statsP or pid in statsG:
+					continue
+					
+				name = player['person']['fullName']
+				name2 = player['person']['fullName'].split(' ')
+				name2 = f"{name2[1]}, {name2[0]}"
+				link = player['person']['link']
+				pos = player['position']['abbreviation']			
 
-			print(name2)
+				my_statP = dict.fromkeys(keysP, 0)
+				my_statG = dict.fromkeys(keysG, 0)
 
-			player_data = requests.get(f"https://statsapi.web.nhl.com{link}/stats?stats=statsSingleSeason&season={season}").json()
-			
-			if player_data['stats'][0]['splits']:
-				stat = player_data['stats'][0]['splits'][0]['stat']				
+				print(name2)
 
-				if pos == 'G':
-					for key in keysG:
-						if key in stat:
-							my_statG[key] = stat[key]
-					my_statG.update(stat)
-					statsG[pid] = [name, name2, pos, team_name, my_statG]
-				else:
-					for key in keysP:
-						if key in stat:
-							my_statP[key] = stat[key]
-					my_statP.update(stat)
-					statsP[pid] = [name, name2, pos, team_name, my_statP]
-	except Exception as e:
-		print(str(e))
+				player_data = requests.get(f"https://statsapi.web.nhl.com{link}/stats?stats=statsSingleSeason&season={season}").json()
+				
+				if player_data['stats'][0]['splits']:
+					stat = player_data['stats'][0]['splits'][0]['stat']				
+
+					if pos == 'G':
+						for key in keysG:
+							if key in stat:
+								my_statG[key] = stat[key]
+						my_statG.update(stat)
+						statsG[pid] = [name, name2, pos, team_name, my_statG]
+					else:
+						for key in keysP:
+							if key in stat:
+								my_statP[key] = stat[key]
+						my_statP.update(stat)
+						statsP[pid] = [name, name2, pos, team_name, my_statP]
+		except Exception as e:
+			print(str(e))
+
+parse_season("https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster")
+parse_season(f"https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster&season={season}")
+
 
 dfP = pd.DataFrame.from_dict(statsP, orient="index", columns=['name', 'name2', 'pos', 'team', 'stats'])
 dfP1 = dfP.reset_index()
@@ -64,8 +73,10 @@ for clmn in reversed(keysPn):
 dfP3[keysPn] = dfP3[keysP].apply(lambda x: (x - x.mean()) / x.std() )
 for clmn in keysPn:
 	dfP3['sum'] += dfP3[clmn]
+dfP3 = dfP3.sort_values['sum', ascending = False]
 
 dfP3.to_csv(f"nhl_statsP_{season}.csv")
+#########################################################################################
 
 dfG = pd.DataFrame.from_dict(statsG, orient="index", columns=['name', 'name2', 'pos', 'team', 'stats'])
 dfG1 = dfG.reset_index()
@@ -79,5 +90,6 @@ dfG3[keysGn] = dfG3[keysG].apply(lambda x: (x - x.mean()) / x.std() )
 dfG3['gaa'] = -dfG3['gaa']
 for clmn in keysGn:
 	dfG3['sum'] += dfG3[clmn]
+dfG3 = dfG3.sort_values['sum', ascending = False]
 
 dfG3.to_csv(f"nhl_statsG_{season}.csv")
