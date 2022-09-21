@@ -52,7 +52,6 @@ for team in teams['teams']:
 					statsP[pid] = [name, name2, pos, team_name, my_statP]
 	except Exception as e:
 		print(str(e))
-	break
 
 dfP = pd.DataFrame.from_dict(statsP, orient="index", columns=['name', 'name2', 'pos', 'team', 'stats'])
 dfP1 = dfP.reset_index()
