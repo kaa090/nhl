@@ -73,7 +73,7 @@ for clmn in reversed(keysPn):
 dfP3[keysPn] = dfP3[keysP].apply(lambda x: (x - x.mean()) / x.std() )
 for clmn in keysPn:
 	dfP3['sum'] += dfP3[clmn]
-dfP3 = dfP3.sort_values['sum', ascending = False]
+dfP3 = dfP3.sort_values('sum', ascending = False)
 
 dfP3.to_csv(f"nhl_statsP_{season}.csv")
 #########################################################################################
@@ -90,6 +90,6 @@ dfG3[keysGn] = dfG3[keysG].apply(lambda x: (x - x.mean()) / x.std() )
 dfG3['gaa'] = -dfG3['gaa']
 for clmn in keysGn:
 	dfG3['sum'] += dfG3[clmn]
-dfG3 = dfG3.sort_values['sum', ascending = False]
+dfG3 = dfG3.sort_values('sum', ascending = False)
 
 dfG3.to_csv(f"nhl_statsG_{season}.csv")
