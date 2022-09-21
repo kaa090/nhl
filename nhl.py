@@ -2,12 +2,14 @@
 import requests
 import pandas as pd
 from time import sleep
-# sdfsfdsf
+
 season = "20212022"
 statsP = {}
 statsG = {}
 keysP = ['goals', 'assists', 'pim', 'powerPlayPoints', 'gameWinningGoals', 'shots', 'hits', 'blocked',]
+keysPn = ['g', 'a', 'pim', 'ppp', 'gwg', '_shots', '_hits', 'blocks',]
 keysG = ['wins', 'goalAgainstAverage', 'savePercentage']
+keysGn = ['w', 'gaa', 'sp']
 
 teams = requests.get(f"https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster").json()
 
@@ -51,22 +53,33 @@ for team in teams['teams']:
 					statsP[pid] = [name, name2, pos, team_name, my_statP]
 	except Exception as e:
 		print(str(e))
+	break
 
 dfP = pd.DataFrame.from_dict(statsP, orient="index", columns=['name', 'name2', 'pos', 'team', 'stats'])
 dfP1 = dfP.reset_index()
 dfP2 = pd.json_normalize(dfP['stats'].dropna())
 dfP3 = pd.merge(dfP1, dfP2, left_index=True, right_index=True).set_index('index').drop('stats', 1)
-dfP3[keysP] = dfP3[keysP].apply(lambda x: (x - x.mean()) / x.std() )
+
 dfP3.insert(4, 'sum', 0)
-dfP3['sum'] = dfP3['goals'] + dfP3['assists']  + dfP3['pim'] + dfP3['powerPlayPoints'] 
-+ dfP3['gameWinningGoals'] + dfP3['shots'] + dfP3['hits'] + dfP3['blocked']
+for clmn in reversed(keysPn):
+	dfP3.insert(5, clmn, 0)
+dfP3[keysPn] = dfP3[keysP].apply(lambda x: (x - x.mean()) / x.std() )
+for clmn in keysPn:
+	dfP3['sum'] += dfP3[clmn]
+
 dfP3.to_csv(f"nhl_statsP_{season}.csv")
 
 dfG = pd.DataFrame.from_dict(statsG, orient="index", columns=['name', 'name2', 'pos', 'team', 'stats'])
 dfG1 = dfG.reset_index()
 dfG2 = pd.json_normalize(dfG['stats'].dropna())
 dfG3 = pd.merge(dfG1, dfG2, left_index=True, right_index=True).set_index('index').drop('stats', 1)
-dfG3[keysG] = dfG3[keysG].apply(lambda x: (x - x.mean()) / x.std() )
+
 dfG3.insert(4, 'sum', 0)
-dfG3['sum'] = dfG3['wins'] + dfG3['goalAgainstAverage']  + dfG3['savePercentage'] 
+for clmn in reversed(keysGn):
+	dfG3.insert(5, clmn, 0)
+dfG3[keysGn] = dfG3[keysG].apply(lambda x: (x - x.mean()) / x.std() )
+dfg3['gaa'] = -dfg3['gaa']
+for clmn in keysGn:
+	dfG3['sum'] += dfG3[clmn]
+
 dfG3.to_csv(f"nhl_statsG_{season}.csv")
