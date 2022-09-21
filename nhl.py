@@ -77,7 +77,7 @@ dfG3.insert(4, 'sum', 0)
 for clmn in reversed(keysGn):
 	dfG3.insert(5, clmn, 0)
 dfG3[keysGn] = dfG3[keysG].apply(lambda x: (x - x.mean()) / x.std() )
-dfg3['gaa'] = -dfg3['gaa']
+dfG3['gaa'] = -dfG3['gaa']
 for clmn in keysGn:
 	dfG3['sum'] += dfG3[clmn]
 
