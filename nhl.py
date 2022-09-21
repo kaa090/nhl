@@ -7,7 +7,7 @@ season = "20212022"
 statsP = {}
 statsG = {}
 keysP = ['goals', 'assists', 'pim', 'powerPlayPoints', 'gameWinningGoals', 'shots', 'hits', 'blocked',]
-keysPn = ['g', 'a', 'pim', 'ppp', 'gwg', '_shots', '_hits', 'blocks',]
+keysPn = ['g', 'a', '_pim', 'ppp', 'gwg', '_shots', '_hits', 'blocks',]
 keysG = ['wins', 'goalAgainstAverage', 'savePercentage']
 keysGn = ['w', 'gaa', 'sp']
 
@@ -26,8 +26,7 @@ for team in teams['teams']:
 			name2 = player['person']['fullName'].split(' ')
 			name2 = f"{name2[1]}, {name2[0]}"
 			link = player['person']['link']
-			pos = player['position']['abbreviation']
-			
+			pos = player['position']['abbreviation']			
 
 			my_statP = dict.fromkeys(keysP, 0)
 			my_statG = dict.fromkeys(keysG, 0)
