@@ -57,7 +57,8 @@ def parse_season(url):
 						statsP[pid] = [name, name2, pos, team_name, my_statP]
 		except Exception as e:
 			print(str(e))
-
+		break
+		
 def get_df(stats, keys, keysN):
 	df = pd.DataFrame.from_dict(stats, orient="index", columns=['name', 'name2', 'pos', 'team', 'stats'])
 	df1 = df.reset_index()
@@ -67,7 +68,7 @@ def get_df(stats, keys, keysN):
 	df3.insert(4, 'sum', 0)
 	for clmn in reversed(keysN):
 		df3.insert(5, clmn, 0)
-	df3[keysN] = df3[keysP].apply(lambda x: (x - x.mean()) / x.std() )
+	df3[keysN] = df3[keys].apply(lambda x: (x - x.mean()) / x.std() )
 
 	if 'gaa' in keys:
 		df3['gaa'] = -df3['gaa']
