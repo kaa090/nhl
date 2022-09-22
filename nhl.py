@@ -57,8 +57,7 @@ def parse_season(url):
 						statsP[pid] = [name, name2, pos, team_name, my_statP]
 		except Exception as e:
 			print(str(e))
-		break
-		
+
 def get_df(stats, keys, keysN):
 	df = pd.DataFrame.from_dict(stats, orient="index", columns=['name', 'name2', 'pos', 'team', 'stats'])
 	df1 = df.reset_index()
