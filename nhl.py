@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 import requests
 import pandas as pd
-from time import sleep
 
+season_1 = "20202021"
 season = "20212022"
 statsP = {}
 statsG = {}
@@ -26,12 +26,12 @@ def parse_season(url):
 
 				if pid in statsP or pid in statsG:
 					continue
-					
+
 				name = player['person']['fullName']
 				name2 = player['person']['fullName'].split(' ')
 				name2 = f"{name2[1]}, {name2[0]}"
 				link = player['person']['link']
-				pos = player['position']['abbreviation']			
+				pos = player['position']['abbreviation']
 
 				my_statP = dict.fromkeys(keysP, 0)
 				my_statG = dict.fromkeys(keysG, 0)
@@ -39,9 +39,9 @@ def parse_season(url):
 				print(name2)
 
 				player_data = requests.get(f"https://statsapi.web.nhl.com{link}/stats?stats=statsSingleSeason&season={season}").json()
-				
+
 				if player_data['stats'][0]['splits']:
-					stat = player_data['stats'][0]['splits'][0]['stat']				
+					stat = player_data['stats'][0]['splits'][0]['stat']
 
 					if pos == 'G':
 						for key in keysG:
@@ -57,43 +57,35 @@ def parse_season(url):
 						statsP[pid] = [name, name2, pos, team_name, my_statP]
 		except Exception as e:
 			print(str(e))
-		break
+
+def get_df(stats, keys, keysN):
+	df = pd.DataFrame.from_dict(stats, orient="index", columns=['name', 'name2', 'pos', 'team', 'stats'])
+	df1 = df.reset_index()
+	df2 = pd.json_normalize(df['stats'].dropna())
+	df3 = pd.merge(df1, df2, left_index=True, right_index=True).set_index('index').drop('stats', 1)
+
+	df3.insert(4, 'sum', 0)
+	for clmn in reversed(keysN):
+		df3.insert(5, clmn, 0)
+	df3[keysN] = df3[keysP].apply(lambda x: (x - x.mean()) / x.std() )
+
+	if 'gaa' in keys:
+		df3['gaa'] = -df3['gaa']
+	for clmn in keysN:
+		df3['sum'] += df3[clmn]
+	df3 = df3.sort_values('sum', ascending = False)
+
+	return df3
 
 parse_season("https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster")
-# parse_season(f"https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster&season={season}")
-# parse_season(f"https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster&season=20202021")
+parse_season(f"https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster&season={season}")
+parse_season(f"https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster&season={season_1}")
 
-dfP = pd.DataFrame.from_dict(statsP, orient="index", columns=['name', 'name2', 'pos', 'team', 'stats'])
-dfP1 = dfP.reset_index()
-dfP2 = pd.json_normalize(dfP['stats'].dropna())
-dfP3 = pd.merge(dfP1, dfP2, left_index=True, right_index=True).set_index('index').drop('stats', 1)
+dfP = get_df(statsP, keysP, keysPn)
+dfG = get_df(statsG, keysG, keysGn)
 
-dfP3.insert(4, 'sum', 0)
-for clmn in reversed(keysPn):
-	dfP3.insert(5, clmn, 0)
-dfP3[keysPn] = dfP3[keysP].apply(lambda x: (x - x.mean()) / x.std() )
-for clmn in keysPn:
-	dfP3['sum'] += dfP3[clmn]
-dfP3 = dfP3.sort_values('sum', ascending = False)
+# dfP.to_csv(f"nhl_statsP_{season}.csv")
+# dfG.to_csv(f"nhl_statsG_{season}.csv")
 
-# dfP3.to_csv(f"nhl_statsP_{season}.csv")
-#########################################################################################
-
-dfG = pd.DataFrame.from_dict(statsG, orient="index", columns=['name', 'name2', 'pos', 'team', 'stats'])
-dfG1 = dfG.reset_index()
-dfG2 = pd.json_normalize(dfG['stats'].dropna())
-dfG3 = pd.merge(dfG1, dfG2, left_index=True, right_index=True).set_index('index').drop('stats', 1)
-
-dfG3.insert(4, 'sum', 0)
-for clmn in reversed(keysGn):
-	dfG3.insert(5, clmn, 0)
-dfG3[keysGn] = dfG3[keysG].apply(lambda x: (x - x.mean()) / x.std() )
-dfG3['gaa'] = -dfG3['gaa']
-for clmn in keysGn:
-	dfG3['sum'] += dfG3[clmn]
-dfG3 = dfG3.sort_values('sum', ascending = False)
-
-# dfG3.to_csv(f"nhl_statsG_{season}.csv")
-
-df = pd.concat([dfP3, dfG3])
-df.to_csv(f"nhl_statPG_{season}.csv")
+dfPG = pd.concat([dfP, dfG])
+dfPG.to_csv(f"nhl_statsPG_{season}.csv")
