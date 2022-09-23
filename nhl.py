@@ -84,8 +84,11 @@ parse_season(f"https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster&seas
 dfP = get_df(statsP, keysP, keysPn)
 dfG = get_df(statsG, keysG, keysGn)
 
-# dfP.to_csv(f"nhl_statsP_{season}.csv")
-# dfG.to_csv(f"nhl_statsG_{season}.csv")
-
 dfPG = pd.concat([dfP, dfG])
 dfPG.to_csv(f"nhl_statsPG_{season}.csv")
+
+# key_all = ['index', 'name', 'name2', 'pos', 'team', 'sum', 'g', 'a', '_pim', 'ppp', 'gwg', '_shots', '_hits', 'blocks', 'goals', 'assists', 'pim', 'powerPlayPoints', 'gameWinningGoals', 'shots', 'hits', 'blocked', 'timeOnIce', 'games', 'w', 'gaa', 'sp', 'wins', 'goalAgainstAverage', 'savePercentage']
+# keyP = ['goals', 'assists', 'pim', 'powerPlayPoints', 'gameWinningGoals', 'shots', 'hits', 'blocked']
+# keyPn = ['g', 'a', '_pim', 'ppp', 'gwg', '_shots', '_hits', 'blocks']
+# keyG = ['wins', 'goalAgainstAverage', 'savePercentage']
+# keyGn = ['w', 'gaa', 'sp']
